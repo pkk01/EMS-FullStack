@@ -1,0 +1,46 @@
+package com.staffsync.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDate;
+
+@Entity
+@Data
+@Table(name = "leave_requests")
+public class LeaveRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LeaveType type;
+
+    @Column(nullable = false)
+    private LocalDate startDate;
+
+    @Column(nullable = false)
+    private LocalDate endDate;
+
+    @Column(nullable = false)
+    private String reason;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LeaveStatus status;
+
+    public enum LeaveType {
+        SICK,
+        CASUAL
+    }
+
+    public enum LeaveStatus {
+        PENDING,
+        APPROVED,
+        REJECTED
+    }
+} 

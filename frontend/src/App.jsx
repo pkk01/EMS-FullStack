@@ -1,8 +1,8 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
+import AdminDashboard from "./components/AdminDashboard";
 import AuthPage from "./components/AuthPage";
 import Landing from "./components/Landing";
-import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   return (

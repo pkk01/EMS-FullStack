@@ -7,13 +7,15 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.5</version>
+		<version>3.2.3</version>
+		<relativePath />
 	</parent>
 
-	<groupId>com.employee</groupId>
+	<groupId>com.staffsync</groupId>
 	<artifactId>backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>backend</name>
+	<description>Backend for StaffSync</description>
 
 	<properties>
 		<java.version>17</java.version>

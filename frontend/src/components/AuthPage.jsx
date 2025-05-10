@@ -48,10 +48,7 @@ const AuthPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await APIService.post(
-        "/api/employees/register",
-        formData
-      );
+      const response = await APIService.post("/api/admins/register", formData);
       showAlert("Registration successful! Please login.", "success");
       // Clear form data
       setFormData({
@@ -76,7 +73,7 @@ const AuthPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await APIService.post("/api/employees/login", {
+      const response = await APIService.post("/api/admins/login", {
         email: formData.email,
         password: formData.password,
       });

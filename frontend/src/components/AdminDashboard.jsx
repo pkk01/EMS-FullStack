@@ -1,12 +1,99 @@
-import { Calendar, FileText, LogOut, Settings, User } from "react-feather";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import {
+  Calendar,
+  FileText,
+  LogOut,
+  Plus,
+  Settings,
+  User,
+} from "react-feather";
 import { useNavigate } from "react-router-dom";
+import AttendanceList from "./AttendanceList";
 import "./Dashboard.css";
+import EmployeeForm from "./EmployeeForm";
+import EmployeeList from "./EmployeeList";
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [showForm, setShowForm] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [adminName, setAdminName] = useState("Admin");
+  const [activeTab, setActiveTab] = useState("employees");
+
+  useEffect(() => {
+    const fetchAdminDetails = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:8085/api/employees",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data && response.data.length > 0) {
+          const admin = response.data[0]; // Get the first employee as admin for now
+          setAdminName(`${admin.firstName} ${admin.lastName}`);
+        }
+      } catch (error) {
+        console.error("Error fetching admin details:", error);
+        setAdminName("Admin");
+      }
+    };
+
+    fetchAdminDetails();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const handleAddEmployee = () => {
+    setSelectedEmployee(null);
+    setShowForm(true);
+  };
+
+  const handleEditEmployee = (employee) => {
+    setSelectedEmployee(employee);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setSelectedEmployee(null);
+  };
+
+  const handleFormSave = () => {
+    setShowForm(false);
+    setSelectedEmployee(null);
+  };
+
+  const renderContent = () => {
+    if (showForm) {
+      return (
+        <EmployeeForm
+          employee={selectedEmployee}
+          onSave={handleFormSave}
+          onCancel={handleFormClose}
+        />
+      );
+    }
+
+    switch (activeTab) {
+      case "employees":
+        return <EmployeeList onEdit={handleEditEmployee} />;
+      case "attendance":
+        return <AttendanceList />;
+      case "reports":
+        return <div>Reports coming soon...</div>;
+      case "settings":
+        return <div>Settings coming soon...</div>;
+      default:
+        return <EmployeeList onEdit={handleEditEmployee} />;
+    }
   };
 
   return (
@@ -17,19 +104,31 @@ const AdminDashboard = () => {
         </div>
         <nav className="sidebar-nav">
           <ul>
-            <li className="active">
+            <li
+              className={activeTab === "employees" ? "active" : ""}
+              onClick={() => setActiveTab("employees")}
+            >
               <User size={20} />
               <span>Employees</span>
             </li>
-            <li>
+            <li
+              className={activeTab === "attendance" ? "active" : ""}
+              onClick={() => setActiveTab("attendance")}
+            >
               <Calendar size={20} />
               <span>Attendance</span>
             </li>
-            <li>
+            <li
+              className={activeTab === "reports" ? "active" : ""}
+              onClick={() => setActiveTab("reports")}
+            >
               <FileText size={20} />
               <span>Reports</span>
             </li>
-            <li>
+            <li
+              className={activeTab === "settings" ? "active" : ""}
+              onClick={() => setActiveTab("settings")}
+            >
               <Settings size={20} />
               <span>Settings</span>
             </li>
@@ -42,11 +141,15 @@ const AdminDashboard = () => {
       </aside>
       <main className="dashboard-main">
         <header className="dashboard-header">
-          <h1>Welcome to Admin Dashboard</h1>
+          <h1>Welcome, {adminName}</h1>
+          {activeTab === "employees" && (
+            <button className="add-employee-btn" onClick={handleAddEmployee}>
+              <Plus size={20} />
+              <span>Add Employee</span>
+            </button>
+          )}
         </header>
-        <div className="dashboard-content">
-          {/* Add your dashboard content here */}
-        </div>
+        <div className="dashboard-content">{renderContent()}</div>
       </main>
     </div>
   );

@@ -1,0 +1,142 @@
+.attendance-list {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.attendance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.attendance-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.date-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.date-picker input {
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.attendance-table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.present {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+.status-badge.absent {
+  background-color: #fbe9e7;
+  color: #d32f2f;
+}
+
+.status-badge.not-marked {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.attendance-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mark-present-btn,
+.mark-absent-btn,
+.checkout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mark-present-btn {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+.mark-present-btn:hover {
+  background-color: #c8e6c9;
+}
+
+.mark-absent-btn {
+  background-color: #fbe9e7;
+  color: #d32f2f;
+}
+
+.mark-absent-btn:hover {
+  background-color: #ffcdd2;
+}
+
+.checkout-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.checkout-btn:hover {
+  background-color: #bbdefb;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #d32f2f;
+  background-color: #fbe9e7;
+  border-radius: 4px;
+  margin: 20px 0;
+}

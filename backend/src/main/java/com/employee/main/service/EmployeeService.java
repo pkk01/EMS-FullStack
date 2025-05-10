@@ -1,5 +1,8 @@
 package com.employee.main.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,29 +15,40 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    public Employee registerEmployee(Employee request) {
-        if (employeeRepository.existsByEmail(request.getEmail())) {
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    public Optional<Employee> getEmployeeById(Long id) {
+        return employeeRepository.findById(id);
+    }
+
+    public Employee createEmployee(Employee employee) {
+        if (employeeRepository.existsByEmail(employee.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
+        return employeeRepository.save(employee);
+    }
 
-        Employee employee = new Employee();
-        employee.setFullName(request.getFullName());
-        employee.setCompanyName(request.getCompanyName());
-        employee.setEmail(request.getEmail());
-        employee.setPassword(request.getPassword());
+    public Employee updateEmployee(Long id, Employee employeeDetails) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        employee.setFirstName(employeeDetails.getFirstName());
+        employee.setLastName(employeeDetails.getLastName());
+        employee.setEmail(employeeDetails.getEmail());
+        employee.setPhoneNumber(employeeDetails.getPhoneNumber());
+        employee.setDepartment(employeeDetails.getDepartment());
+        employee.setPosition(employeeDetails.getPosition());
+        employee.setSalary(employeeDetails.getSalary());
+        employee.setJoiningDate(employeeDetails.getJoiningDate());
 
         return employeeRepository.save(employee);
     }
 
-    // Update the login method to return boolean
-    public boolean loginEmployee(String email, String password) {
-        try {
-            Employee employee = employeeRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            return employee.getPassword().equals(password);
-        } catch (Exception e) {
-            return false;
-        }
+    public void deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        employeeRepository.delete(employee);
     }
 }
