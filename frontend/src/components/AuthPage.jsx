@@ -81,6 +81,7 @@ const AuthPage = () => {
       // Check if response contains token (updated response structure)
       if (response && response.token) {
         localStorage.setItem("token", response.token);
+        localStorage.setItem("adminEmail", formData.email); // Store admin email
         showAlert("Login successful!", "success");
         // Navigate to dashboard after a short delay
         setTimeout(() => {

@@ -25,20 +25,29 @@ const AdminDashboard = () => {
     const fetchAdminDetails = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        console.log("Fetching admin details with token");
+
         const response = await axios.get(
-          "http://localhost:8085/api/employees",
+          "http://localhost:8085/api/admins/current",
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        if (response.data && response.data.length > 0) {
-          const admin = response.data[0]; // Get the first employee as admin for now
-          setAdminName(`${admin.firstName} ${admin.lastName}`);
+
+        console.log("Admin details response:", response.data);
+
+        if (response.data) {
+          setAdminName(response.data.fullName || "Admin");
         }
       } catch (error) {
-        console.error("Error fetching admin details:", error);
+        console.error("Error fetching admin details:", error.response || error);
         setAdminName("Admin");
       }
     };
@@ -48,6 +57,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("adminEmail");
     navigate("/");
   };
 

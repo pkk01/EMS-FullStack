@@ -37,4 +37,12 @@ public class AdminService {
             return false;
         }
     }
+
+    public Admin getAdminByEmail(String email) {
+        System.out.println("Looking up admin with email: " + email);
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+        System.out.println("Found admin: " + admin.getFullName());
+        return admin;
+    }
 }
