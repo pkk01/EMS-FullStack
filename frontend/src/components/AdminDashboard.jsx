@@ -1,18 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  Calendar,
-  FileText,
-  LogOut,
-  Plus,
-  Settings,
-  User,
-} from "react-feather";
+import { Calendar, FileText, LogOut, Plus, User } from "react-feather";
 import { useNavigate } from "react-router-dom";
+import AdminProfile from "./AdminProfile";
 import AttendanceList from "./AttendanceList";
 import "./Dashboard.css";
 import EmployeeForm from "./EmployeeForm";
 import EmployeeList from "./EmployeeList";
+import LeaveManagement from "./LeaveManagement";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -98,9 +93,9 @@ const AdminDashboard = () => {
       case "attendance":
         return <AttendanceList />;
       case "reports":
-        return <div>Reports coming soon...</div>;
+        return <LeaveManagement />;
       case "settings":
-        return <div>Settings coming soon...</div>;
+        return <AdminProfile />;
       default:
         return <EmployeeList onEdit={handleEditEmployee} />;
     }
@@ -133,14 +128,14 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab("reports")}
             >
               <FileText size={20} />
-              <span>Reports</span>
+              <span>Leaves</span>
             </li>
             <li
               className={activeTab === "settings" ? "active" : ""}
               onClick={() => setActiveTab("settings")}
             >
-              <Settings size={20} />
-              <span>Settings</span>
+              <User size={20} />
+              <span>My Profile</span>
             </li>
           </ul>
         </nav>

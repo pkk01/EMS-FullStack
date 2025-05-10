@@ -1,11 +1,17 @@
 package com.employee.main.service;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,34 +35,78 @@ public class AttendanceService {
     private EmployeeRepository employeeRepository;
 
     public Attendance markAttendance(Long employeeId, String status, LocalDate date) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        logger.info("Attempting to mark attendance for employee {} with status {} on date {}", employeeId, status,
+                date);
 
+        // Validate employee exists
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> {
+                    logger.error("Employee not found with ID: {}", employeeId);
+                    return new RuntimeException("Employee not found");
+                });
+
+        // Set time range for the day
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-        Attendance existingAttendance = attendanceRepository
-                .findByEmployeeAndCheckInBetween(employee, startOfDay, endOfDay)
-                .stream()
-                .findFirst()
-                .orElse(null);
+        // Check for existing attendance record
+        List<Attendance> existingAttendance = attendanceRepository
+                .findByEmployeeAndCheckInBetween(employee, startOfDay, endOfDay);
 
-        if (existingAttendance != null) {
-            existingAttendance.setStatus(status);
-            return attendanceRepository.save(existingAttendance);
+        if (!existingAttendance.isEmpty()) {
+            logger.warn("Found existing attendance record for employee {} on date {}. Cannot mark attendance again.",
+                    employeeId, date);
+            throw new RuntimeException("Attendance already marked for this employee on this date");
         }
 
+        // Validate status
+        if (!isValidStatus(status)) {
+            logger.error("Invalid status provided: {}", status);
+            throw new RuntimeException("Invalid attendance status");
+        }
+
+        // Create new attendance record
         Attendance attendance = new Attendance();
         attendance.setEmployee(employee);
-        attendance.setCheckIn(LocalDateTime.now());
         attendance.setStatus(status);
-        return attendanceRepository.save(attendance);
+        LocalDateTime now = LocalDateTime.now();
+        attendance.setCheckIn(now);
+
+        logger.info("Creating new attendance record for employee {} with status {} at {}",
+                employeeId, status, now);
+
+        Attendance savedAttendance = attendanceRepository.save(attendance);
+
+        // Ensure employee data is loaded
+        savedAttendance.setEmployee(employee);
+
+        logger.info("Saved attendance record: {}", savedAttendance);
+        return savedAttendance;
+    }
+
+    private boolean isValidStatus(String status) {
+        return status != null && (status.equals("PRESENT") || status.equals("ABSENT"));
     }
 
     public Attendance markCheckout(Long attendanceId) {
+        logger.info("Attempting to mark checkout for attendance record {}", attendanceId);
+
         Attendance attendance = attendanceRepository.findById(attendanceId)
-                .orElseThrow(() -> new RuntimeException("Attendance record not found"));
-        attendance.setCheckOut(LocalDateTime.now());
+                .orElseThrow(() -> {
+                    logger.error("Attendance record not found with ID: {}", attendanceId);
+                    return new RuntimeException("Attendance record not found");
+                });
+
+        if (attendance.getCheckOut() != null) {
+            logger.warn("Attendance record {} already has checkout time: {}",
+                    attendanceId, attendance.getCheckOut());
+            throw new RuntimeException("Checkout already marked for this attendance record");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        attendance.setCheckOut(now);
+
+        logger.info("Marked checkout for attendance record {} at {}", attendanceId, now);
         return attendanceRepository.save(attendance);
     }
 
@@ -86,6 +136,10 @@ public class AttendanceService {
                         .orElse(null);
                 if (employee != null) {
                     attendance.setEmployee(employee);
+                    // Ensure status is set
+                    if (attendance.getStatus() == null) {
+                        attendance.setStatus("NOT_MARKED");
+                    }
                     result.add(attendance);
                 }
             }
@@ -101,6 +155,8 @@ public class AttendanceService {
                 Attendance newAttendance = new Attendance();
                 newAttendance.setEmployee(employee);
                 newAttendance.setStatus("NOT_MARKED");
+                newAttendance.setCheckIn(null);
+                newAttendance.setCheckOut(null);
                 result.add(newAttendance);
             }
         }
@@ -121,5 +177,61 @@ public class AttendanceService {
         }
 
         return attendances;
+    }
+
+    public byte[] generateExcelReport(LocalDate date) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Attendance Report");
+
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("Employee Name");
+            headerRow.createCell(1).setCellValue("Status");
+            headerRow.createCell(2).setCellValue("Check In");
+            headerRow.createCell(3).setCellValue("Check Out");
+
+            // Get attendance data
+            List<Attendance> attendanceList = getAttendanceByDate(date);
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+            // Fill data rows
+            int rowNum = 1;
+            for (Attendance attendance : attendanceList) {
+                Row row = sheet.createRow(rowNum++);
+
+                // Employee Name
+                String employeeName = attendance.getEmployee().getFirstName() + " " +
+                        attendance.getEmployee().getLastName();
+                row.createCell(0).setCellValue(employeeName);
+
+                // Status - Handle all possible cases
+                String status = attendance.getStatus();
+                if (status == null || status.isEmpty() || "NOT_MARKED".equals(status)) {
+                    status = "Not Marked";
+                } else if ("PRESENT".equals(status)) {
+                    status = "Present";
+                } else if ("ABSENT".equals(status)) {
+                    status = "Absent";
+                }
+                row.createCell(1).setCellValue(status);
+
+                // Check In
+                String checkIn = attendance.getCheckIn() != null ? attendance.getCheckIn().format(timeFormatter) : "-";
+                row.createCell(2).setCellValue(checkIn);
+
+                // Check Out
+                String checkOut = attendance.getCheckOut() != null ? attendance.getCheckOut().format(timeFormatter)
+                        : "-";
+                row.createCell(3).setCellValue(checkOut);
+            }
+
+            // Write to byte array
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            logger.error("Error generating Excel report", e);
+            throw new RuntimeException("Failed to generate Excel report");
+        }
     }
 }
