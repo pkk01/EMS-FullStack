@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import "./AdminProfile.css";
+import Watermark from "./Watermark";
 
 const AdminProfile = () => {
   const [adminDetails, setAdminDetails] = useState({
@@ -60,6 +61,7 @@ const AdminProfile = () => {
 
   return (
     <div className="profile-container">
+      <Watermark />
       <div className="profile-header">
         <h2>My Profile</h2>
       </div>

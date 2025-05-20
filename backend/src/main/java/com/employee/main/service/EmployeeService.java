@@ -19,6 +19,10 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
+    public List<Employee> getEmployeesByCompany(String companyName) {
+        return employeeRepository.findByCompanyName(companyName);
+    }
+
     public Optional<Employee> getEmployeeById(Long id) {
         return employeeRepository.findById(id);
     }

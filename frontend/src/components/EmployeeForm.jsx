@@ -56,14 +56,20 @@ const EmployeeForm = ({ employee, onSave, onCancel }) => {
 
     try {
       console.log("Submitting employee data:", formData);
+      const token = localStorage.getItem("token");
       if (employee) {
         await axios.put(
           `http://localhost:8085/api/employees/${employee.id}`,
-          formData
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         console.log("Employee updated successfully");
       } else {
-        await axios.post("http://localhost:8085/api/employees", formData);
+        await axios.post("http://localhost:8085/api/employees", formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         console.log("Employee created successfully");
       }
       onSave();

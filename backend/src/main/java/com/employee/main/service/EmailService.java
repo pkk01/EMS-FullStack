@@ -1,0 +1,83 @@
+package com.employee.main.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
+@Service
+public class EmailService {
+
+    @Autowired
+    private JavaMailSender emailSender;
+
+    public void sendLeaveApprovalEmail(String employeeEmail, String employeeName, String adminName,
+            String startDate, String endDate) throws MessagingException {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setFrom("prathamdowork@gmail.com");
+        helper.setTo(employeeEmail);
+        helper.setSubject("Leave Request Approved");
+
+        String content = String.format(
+                "Dear %s,\n\n" +
+                        "Your leave request has been approved by Admin %s.\n" +
+                        "Leave Period: From %s to %s\n\n" +
+                        "Best regards,\n" +
+                        "StaffSync Team",
+                employeeName, adminName, startDate, endDate);
+
+        helper.setText(content);
+        emailSender.send(message);
+    }
+
+    public void sendLeaveRejectionEmail(String employeeEmail, String employeeName, String adminName,
+            String startDate, String endDate) throws MessagingException {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setFrom("prathamdowork@gmail.com");
+        helper.setTo(employeeEmail);
+        helper.setSubject("Leave Request Rejected");
+
+        String content = String.format(
+                "Dear %s,\n\n" +
+                        "Your leave request has been rejected Admin by %s.\n" +
+                        "Requested Leave Period: From %s to %s\n\n" +
+                        "Best regards,\n" +
+                        "StaffSync Team",
+                employeeName, adminName, startDate, endDate);
+
+        helper.setText(content);
+        emailSender.send(message);
+    }
+
+    public void sendAdminNotificationEmail(String adminEmail, String adminName, String employeeName,
+            String startDate, String endDate, boolean isApproved) throws MessagingException {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setFrom("prathamdowork@gmail.com");
+        helper.setTo(adminEmail);
+        helper.setSubject("Leave Request " + (isApproved ? "Approved" : "Rejected") + " - Notification");
+
+        String content = String.format(
+                "Dear %s,\n\n" +
+                        "You have %s the leave request for %s.\n" +
+                        "Leave Period: From %s to %s\n\n" +
+                        "Best regards,\n" +
+                        "StaffSync Team",
+                adminName,
+                isApproved ? "approved" : "rejected",
+                employeeName,
+                startDate,
+                endDate);
+
+        helper.setText(content);
+        emailSender.send(message);
+    }
+}

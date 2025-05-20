@@ -43,13 +43,17 @@ public class AdminController {
         try {
             boolean isValid = adminService.loginAdmin(request.getEmail(), request.getPassword());
             if (isValid) {
+                // Get admin details
+                Admin admin = adminService.getAdminByEmail(request.getEmail());
+
                 // Generate JWT token
                 String token = jwtUtil.generateToken(request.getEmail());
 
-                // Create response with token
+                // Create response with token and admin details
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
                 response.put("message", "Login successful");
+                response.put("fullName", admin.getFullName());
 
                 return ResponseEntity.ok(response);
             } else {

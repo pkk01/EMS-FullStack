@@ -8,6 +8,7 @@ import "./Dashboard.css";
 import EmployeeForm from "./EmployeeForm";
 import EmployeeList from "./EmployeeList";
 import LeaveManagement from "./LeaveManagement";
+import Watermark from "./Watermark";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -103,6 +104,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="dashboard-container">
+      <Watermark />
       <aside className="dashboard-sidebar">
         <div className="sidebar-header">
           <h2>StaffSync</h2>

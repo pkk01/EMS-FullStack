@@ -34,6 +34,9 @@ public class Employee {
 	@Column(name = "phone_number")
 	private String phoneNumber;
 
+	@Column(name = "company_name", nullable = false)
+	private String companyName;
+
 	private String department;
 
 	private String position;
@@ -81,6 +84,14 @@ public class Employee {
 
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 
 	public String getDepartment() {

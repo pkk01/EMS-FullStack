@@ -21,6 +21,9 @@ public class LeaveService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     public List<Leave> getAllLeaves() {
         return leaveRepository.findAll();
     }
@@ -34,7 +37,7 @@ public class LeaveService {
         return leaveRepository.save(leave);
     }
 
-    public Leave updateLeaveStatus(Long leaveId, String status) {
+    public Leave updateLeaveStatus(Long leaveId, String status, String adminName) {
         Leave leave = leaveRepository.findById(leaveId)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
@@ -43,7 +46,45 @@ public class LeaveService {
         }
 
         leave.setStatus(status);
-        return leaveRepository.save(leave);
+        Leave updatedLeave = leaveRepository.save(leave);
+
+        // Send email notifications
+        try {
+            Employee employee = leave.getEmployee();
+            String startDate = leave.getStartDate().toString();
+            String endDate = leave.getEndDate().toString();
+
+            if (status.equals("APPROVED")) {
+                emailService.sendLeaveApprovalEmail(
+                        employee.getEmail(),
+                        employee.getFirstName() + " " + employee.getLastName(),
+                        adminName,
+                        startDate,
+                        endDate);
+            } else if (status.equals("REJECTED")) {
+                emailService.sendLeaveRejectionEmail(
+                        employee.getEmail(),
+                        employee.getFirstName() + " " + employee.getLastName(),
+                        adminName,
+                        startDate,
+                        endDate);
+            }
+
+            // Send notification to admin
+            emailService.sendAdminNotificationEmail(
+                    "prathamdowork@gmail.com", // Admin email
+                    adminName,
+                    employee.getFirstName() + " " + employee.getLastName(),
+                    startDate,
+                    endDate,
+                    status.equals("APPROVED"));
+        } catch (Exception e) {
+            // Log the error but don't throw it to prevent the leave status update from
+            // failing
+            e.printStackTrace();
+        }
+
+        return updatedLeave;
     }
 
     public List<Leave> getLeavesByEmployee(Long employeeId) {

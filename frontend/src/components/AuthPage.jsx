@@ -9,8 +9,9 @@ import {
   Users,
 } from "react-feather";
 import { useNavigate } from "react-router-dom";
-import "./Auth.css";
 import APIService from "./api";
+import "./Auth.css";
+import Watermark from "./Watermark";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -81,7 +82,8 @@ const AuthPage = () => {
       // Check if response contains token (updated response structure)
       if (response && response.token) {
         localStorage.setItem("token", response.token);
-        localStorage.setItem("adminEmail", formData.email); // Store admin email
+        localStorage.setItem("adminEmail", formData.email);
+        localStorage.setItem("adminName", response.fullName || "Admin"); // Store admin name
         showAlert("Login successful!", "success");
         // Navigate to dashboard after a short delay
         setTimeout(() => {
@@ -98,6 +100,7 @@ const AuthPage = () => {
 
   return (
     <div className="auth-container">
+      <Watermark />
       {alert.show && (
         <div className={`alert alert-${alert.type}`}>{alert.message}</div>
       )}
@@ -202,13 +205,35 @@ const AuthPage = () => {
             </div>
             <div className="input-group">
               <label>Company Name</label>
-              <input
-                type="text"
+              <select
                 name="companyName"
                 value={formData.companyName}
                 onChange={handleInputChange}
-                placeholder="Your Company Ltd."
-              />
+                required
+              >
+                <option value="">Select a Company</option>
+                <option value="Apple">Apple</option>
+                <option value="Google">Google</option>
+                <option value="Microsoft">Microsoft</option>
+                <option value="Alphabet">Alphabet</option>
+                <option value="Amazon">Amazon</option>
+                <option value="NVIDIA">NVIDIA</option>
+                <option value="Meta">Meta</option>
+                <option value="Samsung Electronics">Samsung Electronics</option>
+                <option value="TSMC">TSMC</option>
+                <option value="Tencent">Tencent</option>
+                <option value="Oracle">Oracle</option>
+                <option value="IBM">IBM</option>
+                <option value="Intel">Intel</option>
+                <option value="Adobe">Adobe</option>
+                <option value="Salesforce">Salesforce</option>
+                <option value="Cisco">Cisco</option>
+                <option value="Broadcom">Broadcom</option>
+                <option value="Uber">Uber</option>
+                <option value="SAP">SAP</option>
+                <option value="Spotify">Spotify</option>
+                <option value="Netflix">Netflix</option>
+              </select>
             </div>
             <div className="input-group">
               <label>Work Email</label>

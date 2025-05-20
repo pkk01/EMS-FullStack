@@ -16,6 +16,7 @@ import {
   Users,
 } from "react-feather";
 import "./Landing.css";
+import Watermark from "./Watermark";
 
 const Landing = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -30,6 +31,7 @@ const Landing = () => {
 
   return (
     <div className="landing-container">
+      <Watermark />
       {/* Glass Navbar */}
       <nav className="navbar">
         <div className="logo">
@@ -57,7 +59,10 @@ const Landing = () => {
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
         </div>
-        <button className="nav-button" onClick={() => window.location.href = "/auth"}>
+        <button
+          className="nav-button"
+          onClick={() => (window.location.href = "/auth")}
+        >
           <LogIn size={18} /> Login
         </button>
       </nav>
@@ -74,7 +79,10 @@ const Landing = () => {
             one unified platform.
           </p>
           <div className="hero-buttons">
-            <button className="primary-button" onClick={() => window.location.href = "/auth"}>
+            <button
+              className="primary-button"
+              onClick={() => (window.location.href = "/auth")}
+            >
               Get Started <LogIn size={18} />
             </button>
             <button className="secondary-button">

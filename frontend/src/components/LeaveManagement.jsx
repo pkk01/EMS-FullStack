@@ -11,6 +11,10 @@ const LeaveManagement = () => {
   const [reason, setReason] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [processingLeave, setProcessingLeave] = useState({
+    id: null,
+    action: null,
+  });
 
   useEffect(() => {
     fetchEmployees();
@@ -79,19 +83,26 @@ const LeaveManagement = () => {
 
   const handleStatusChange = async (leaveId, newStatus) => {
     try {
+      setProcessingLeave({ id: leaveId, action: newStatus });
       const token = localStorage.getItem("token");
+      const adminName = localStorage.getItem("adminName") || "Admin";
       await axios.put(
         `http://localhost:8085/api/leaves/${leaveId}/status`,
-        { status: newStatus },
+        {
+          status: newStatus,
+          adminName: adminName,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       // Refresh leave requests
-      fetchLeaveRequests();
+      await fetchLeaveRequests();
     } catch (error) {
       console.error("Error updating leave status:", error);
       setError("Failed to update leave status");
+    } finally {
+      setProcessingLeave({ id: null, action: null });
     }
   };
 
@@ -198,14 +209,26 @@ const LeaveManagement = () => {
                     <button
                       onClick={() => handleStatusChange(request.id, "APPROVED")}
                       className="approve-button"
+                      disabled={processingLeave.id === request.id}
                     >
-                      Approve
+                      {processingLeave.id === request.id &&
+                      processingLeave.action === "APPROVED" ? (
+                        <span className="loading-spinner"></span>
+                      ) : (
+                        "Approve"
+                      )}
                     </button>
                     <button
                       onClick={() => handleStatusChange(request.id, "REJECTED")}
                       className="reject-button"
+                      disabled={processingLeave.id === request.id}
                     >
-                      Reject
+                      {processingLeave.id === request.id &&
+                      processingLeave.action === "REJECTED" ? (
+                        <span className="loading-spinner"></span>
+                      ) : (
+                        "Reject"
+                      )}
                     </button>
                   </div>
                 )}

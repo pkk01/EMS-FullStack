@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Edit, Eye, Trash2 } from "react-feather";
 import "./EmployeeList.css";
+import Watermark from "./Watermark";
 
 const EmployeeList = ({ onEdit }) => {
   const [employees, setEmployees] = useState([]);
@@ -17,7 +18,10 @@ const EmployeeList = ({ onEdit }) => {
   const fetchEmployees = async () => {
     try {
       console.log("Fetching employees...");
-      const response = await axios.get("http://localhost:8085/api/employees");
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:8085/api/employees", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("Response received:", response.data);
       setEmployees(response.data);
       setLoading(false);
@@ -36,7 +40,10 @@ const EmployeeList = ({ onEdit }) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
         console.log("Deleting employee with ID:", id);
-        await axios.delete(`http://localhost:8085/api/employees/${id}`);
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:8085/api/employees/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         console.log("Employee deleted successfully");
         fetchEmployees();
       } catch (err) {
@@ -75,6 +82,7 @@ const EmployeeList = ({ onEdit }) => {
 
   return (
     <div className="employee-list">
+      <Watermark />
       <h2>Employee List</h2>
       {employees.length === 0 ? (
         <p className="no-employees">

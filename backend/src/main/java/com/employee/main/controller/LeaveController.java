@@ -38,7 +38,8 @@ public class LeaveController {
     public ResponseEntity<Leave> updateLeaveStatus(
             @PathVariable Long id,
             @RequestBody LeaveStatusRequest statusRequest) {
-        return ResponseEntity.ok(leaveService.updateLeaveStatus(id, statusRequest.getStatus()));
+        return ResponseEntity
+                .ok(leaveService.updateLeaveStatus(id, statusRequest.getStatus(), statusRequest.getAdminName()));
     }
 
     @GetMapping("/employee/{employeeId}")
@@ -54,6 +55,7 @@ public class LeaveController {
 
 class LeaveStatusRequest {
     private String status;
+    private String adminName;
 
     public String getStatus() {
         return status;
@@ -61,6 +63,14 @@ class LeaveStatusRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getAdminName() {
+        return adminName;
+    }
+
+    public void setAdminName(String adminName) {
+        this.adminName = adminName;
     }
 }
 

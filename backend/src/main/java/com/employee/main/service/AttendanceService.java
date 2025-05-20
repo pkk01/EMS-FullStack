@@ -17,9 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
+import com.employee.main.entity.Admin;
 import com.employee.main.entity.Attendance;
 import com.employee.main.entity.Employee;
+import com.employee.main.repository.AdminRepository;
 import com.employee.main.repository.AttendanceRepository;
 import com.employee.main.repository.EmployeeRepository;
 
@@ -33,6 +37,9 @@ public class AttendanceService {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
 
     public Attendance markAttendance(Long employeeId, String status, LocalDate date) {
         logger.info("Attempting to mark attendance for employee {} with status {} on date {}", employeeId, status,
@@ -116,13 +123,17 @@ public class AttendanceService {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-        // Get all employees
-        List<Employee> allEmployees = employeeRepository.findAll();
-        logger.info("Found {} employees", allEmployees.size());
+        // Get admin's company from the current context
+        String adminCompany = getCurrentAdminCompany();
+        logger.info("Filtering attendance for company: {}", adminCompany);
 
-        // Get existing attendance records
+        // Get employees for the admin's company
+        List<Employee> companyEmployees = employeeRepository.findByCompanyName(adminCompany);
+        logger.info("Found {} employees for company {}", companyEmployees.size(), adminCompany);
+
+        // Get existing attendance records for these employees
         List<Attendance> existingAttendance = attendanceRepository
-                .findByCheckInBetween(startOfDay, endOfDay);
+                .findByEmployeeInAndCheckInBetween(companyEmployees, startOfDay, endOfDay);
         logger.info("Found {} existing attendance records", existingAttendance.size());
 
         // Create a map of employee IDs to their attendance records
@@ -146,7 +157,7 @@ public class AttendanceService {
         }
 
         // Then add attendance records for employees without attendance
-        for (Employee employee : allEmployees) {
+        for (Employee employee : companyEmployees) {
             boolean hasAttendance = result.stream()
                     .anyMatch(a -> a.getEmployee() != null &&
                             a.getEmployee().getId().equals(employee.getId()));
@@ -162,6 +173,24 @@ public class AttendanceService {
         }
 
         return result;
+    }
+
+    private String getCurrentAdminCompany() {
+        // Get the current admin's email from the request context
+        Object adminEmailObj = RequestContextHolder.currentRequestAttributes()
+                .getAttribute("adminEmail", RequestAttributes.SCOPE_REQUEST);
+
+        if (adminEmailObj == null) {
+            throw new RuntimeException("Admin email not found in request context");
+        }
+
+        String adminEmail = adminEmailObj.toString();
+
+        // Get the admin's company from the database
+        Admin admin = adminRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+        return admin.getCompanyName();
     }
 
     public List<Attendance> getEmployeeAttendanceByDateRange(Long employeeId, LocalDateTime startDate,

@@ -1,0 +1,43 @@
+package com.employee.main.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.employee.main.entity.SuperAdmin;
+
+@Service
+public class SuperAdminService {
+
+    @Autowired
+    private SuperAdminRepository superAdminRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public SuperAdmin createSuperAdmin(String email, String password) {
+        if (superAdminRepository.existsByEmail(email)) {
+            throw new RuntimeException("Super Admin with this email already exists");
+        }
+
+        SuperAdmin superAdmin = new SuperAdmin();
+        superAdmin.setEmail(email);
+        superAdmin.setPassword(passwordEncoder.encode(password));
+        return superAdminRepository.save(superAdmin);
+    }
+
+    public Optional<SuperAdmin> findByEmail(String email) {
+        return superAdminRepository.findByEmail(email);
+    }
+
+    public List<SuperAdmin> getAllSuperAdmins() {
+        return superAdminRepository.findAll();
+    }
+
+    public void deleteSuperAdmin(Long id) {
+        superAdminRepository.deleteById(id);
+    }
+}

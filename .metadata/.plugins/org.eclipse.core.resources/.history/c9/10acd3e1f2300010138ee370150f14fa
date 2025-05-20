@@ -1,0 +1,28 @@
+package com.employee.main.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import com.employee.main.entity.SuperAdmin;
+import com.employee.main.repository.SuperAdminRepository;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+
+    @Autowired
+    private SuperAdminRepository superAdminRepository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        // Create initial super admin if none exists
+        if (superAdminRepository.count() == 0) {
+            SuperAdmin superAdmin = new SuperAdmin();
+            superAdmin.setEmail("0000@gmail.com");
+            superAdmin.setPassword("0000");
+            superAdmin.setRole("SUPER_ADMIN");
+            superAdmin.setActive(true);
+            superAdminRepository.save(superAdmin);
+        }
+    }
+}
